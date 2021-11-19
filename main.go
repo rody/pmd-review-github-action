@@ -52,6 +52,9 @@ func main() {
 
 	gc := NewGClient(githubToken, owner, repo)
 	pr, err := gc.getDiff(context.Background(), sha)
+	if err != nil {
+		githubactions.Fatalf("%s", err)
+	}
 
 	githubactions.Debugf("pr %+v", *pr)
 
