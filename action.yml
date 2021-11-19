@@ -17,7 +17,7 @@ inputs:
       the report creation.
     required: false
     default: ''
-  sha:
+  pr-number:
     description: the sha to use
     required: true
 
