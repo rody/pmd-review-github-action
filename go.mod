@@ -7,6 +7,8 @@ require (
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
 )
 
+require github.com/waigani/diffparser v0.0.0-20190828052634-7391f219313d // indirect
+
 require (
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v40 v40.0.0

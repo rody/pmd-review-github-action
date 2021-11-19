@@ -50,12 +50,12 @@ func main() {
 
 
 	gc := NewGClient(githubToken, repository)
-	pr, err := gc.getDiff(context.Background(), prNumber)
+	diff, err := gc.getDiff(context.Background(), prNumber)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
 	}
 
-	githubactions.Debugf("pr %+v", *pr)
+	githubactions.Debugf("diff %+v", *diff)
 
 	report, err := parseReport(reportfile)
 	if err != nil {
