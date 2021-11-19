@@ -35,8 +35,13 @@ func main() {
 		}
 	}
 
-	repository := os.Getenv("GITHUB_REPOSITORY")
-	if repository == "" {
+	owner := os.Getenv("GITHUB_REPOSITORY_OWNER")
+	if owner == "" {
+		githubactions.Fatalf("missing GITHUB_REPOSITORY_OWNER")
+	}
+
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if owner == "" {
 		githubactions.Fatalf("missing GITHUB_REPOSITORY")
 	}
 
@@ -48,7 +53,7 @@ func main() {
 	gc := NewGClient(githubToken, repository)
 	diff, err := gc.getDiff(context.Background(), sha)
 
-	githubactions.Debugf("diff %+v", diff)
+	githubactions.Debugf("diff %+v", *diff)
 
 
 	report, err := parseReport(reportfile)
