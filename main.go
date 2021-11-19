@@ -23,7 +23,7 @@ func main() {
 	flag.StringVar(&dir, "dir", "", "")
 	flag.StringVar(&reportfile, "reportfile", "", "")
 	flag.StringVar(&githubToken, "github-token", "", "")
-	flag.IntVar(&prNumber, "pr-number", "", "")
+	flag.IntVar(&prNumber, "pr-number", 0, "")
 	flag.Parse()
 
 	if reportfile == "" {
