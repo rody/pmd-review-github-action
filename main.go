@@ -69,14 +69,19 @@ func main() {
 	}
 
 	msg := "Some changes are required :D"
+	event := "REQUEST_CHANGES"
 	review := github.PullRequestReviewRequest{
 		Body: &msg,
 		Comments: comments,
-
+		Event: &event,
 	}
 
-	gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
+	preview, _, err := gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
+	if err != nil {
+		githubactions.Fatalf("Could not create review: %s", err)
+	}
 
+	githubactions.Debugf("review: %+v", preview)
 }
 
 func getReviewComments(diff *diffparser.Diff, violations map[string]pmd.LineViolations) []*github.DraftReviewComment {
