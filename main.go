@@ -115,7 +115,6 @@ func getReviewComments(diff *diffparser.Diff, violations map[string]pmd.LineViol
 						Path: &v.FileName,
 						Position: &dl.Position,
 						Body: &v.Description,
-						Line: &v.BeginLine,
 					})
 				}
 			}
