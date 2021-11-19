@@ -50,11 +50,10 @@ func main() {
 		githubactions.Fatalf("missing GITHUB_SHA")
 	}
 
-	gc := NewGClient(githubToken, repository)
-	diff, err := gc.getDiff(context.Background(), sha)
+	gc := NewGClient(githubToken, owner, repo)
+	pr, err := gc.getDiff(context.Background(), sha)
 
-	githubactions.Debugf("diff %+v", *diff)
-
+	githubactions.Debugf("pr %+v", *pr)
 
 	report, err := parseReport(reportfile)
 	if err != nil {
