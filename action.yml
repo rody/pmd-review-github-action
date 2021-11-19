@@ -29,6 +29,8 @@ runs:
     - ${{ inputs.reportfile }}
     - --dir
     - ${{ inputs.dir }}
+    - --pr-number
+    - ${{ inputs.pr-number }}
 
 branding:
   icon: 'flag'

@@ -90,3 +90,4 @@ func parseReport(filename string) (pmd.Report, error) {
 	defer f.Close()
 	return pmd.Parse(f)
 }
+
