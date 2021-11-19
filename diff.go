@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/google/go-github/v40/github"
 	"github.com/sethvargo/go-githubactions"
@@ -15,7 +16,7 @@ type GClient struct {
 	Repo   string
 }
 
-func NewGClient(token, owner, repo string) *GClient {
+func NewGClient(token, repository string) *GClient {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -24,8 +25,8 @@ func NewGClient(token, owner, repo string) *GClient {
 
 	return &GClient{
 		client: github.NewClient(tc),
-		Owner:  owner,
-		Repo:   repo,
+		Owner:  strings.Split(repository, "/")[0],
+		Repo:   strings.Split(repository, "/")[1],
 	}
 }
 

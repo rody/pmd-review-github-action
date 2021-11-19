@@ -35,13 +35,8 @@ func main() {
 		}
 	}
 
-	owner := os.Getenv("GITHUB_REPOSITORY_OWNER")
-	if owner == "" {
-		githubactions.Fatalf("missing GITHUB_REPOSITORY_OWNER")
-	}
-
-	repo := os.Getenv("GITHUB_REPOSITORY")
-	if owner == "" {
+	repository := os.Getenv("GITHUB_REPOSITORY")
+	if repository == "" {
 		githubactions.Fatalf("missing GITHUB_REPOSITORY")
 	}
 
@@ -50,9 +45,9 @@ func main() {
 		githubactions.Fatalf("missing GITHUB_SHA")
 	}
 
-	githubactions.Debugf("owner: %s, repo: %s, sha: %s", owner, repo, sha)
+	githubactions.Debugf("repo: %s, sha: %s", repository, sha)
 
-	gc := NewGClient(githubToken, owner, repo)
+	gc := NewGClient(githubToken, repository)
 	pr, err := gc.getDiff(context.Background(), sha)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
