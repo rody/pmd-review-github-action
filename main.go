@@ -26,6 +26,8 @@ func main() {
 	flag.IntVar(&prNumber, "pr-number", 0, "")
 	flag.Parse()
 
+	githubactions.Debugf("prNumber: %s", prNumber)
+
 	if reportfile == "" {
 		githubactions.Fatalf("missing input 'reportfile'")
 	}
@@ -46,7 +48,6 @@ func main() {
 		githubactions.Fatalf("missing pr-number")
 	}
 
-	githubactions.Debugf("repo: %s, sha: %s", repository, prNumber)
 
 	gc := NewGClient(githubToken, repository)
 	pr, err := gc.getDiff(context.Background(), prNumber)
