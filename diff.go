@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/google/go-github/v40/github"
-	"github.com/sethvargo/go-githubactions"
 	"golang.org/x/oauth2"
 )
 
@@ -30,24 +28,7 @@ func NewGClient(token, repository string) *GClient {
 	}
 }
 
-func (gc *GClient) getDiff(ctx context.Context, sha string) (*github.PullRequest, error) {
-	prOptions := github.PullRequestListOptions{
-		Head:  sha,
-		State: "open",
-	}
-
-	prs, _, err := gc.client.PullRequests.ListPullRequestsWithCommit(ctx, gc.Owner, gc.Repo, sha, &prOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(prs) == 0 {
-		return nil, fmt.Errorf("no open PR found containing sha %s", sha)
-	}
-
-	for _, pr := range prs {
-		githubactions.Debugf("pr: %v\n", pr)
-	}
-
-	return prs[0], nil
+func (gc *GClient) getDiff(ctx context.Context, prNumber int) (*github.PullRequest, error) {
+	pr, _, err := gc.client.PullRequests.Get(ctx, gc.Owner, gc.Repo, prNumber)
+	return pr, err
 }

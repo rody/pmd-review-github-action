@@ -16,14 +16,14 @@ var (
 	dir         string
 	reportfile  string
 	githubToken string
-	sha         string
+	prNumber    int
 )
 
 func main() {
 	flag.StringVar(&dir, "dir", "", "")
 	flag.StringVar(&reportfile, "reportfile", "", "")
 	flag.StringVar(&githubToken, "github-token", "", "")
-	flag.StringVar(&sha, "sha", "", "")
+	flag.IntVar(&prNumber, "pr-number", "", "")
 	flag.Parse()
 
 	if reportfile == "" {
@@ -42,14 +42,14 @@ func main() {
 		githubactions.Fatalf("missing GITHUB_REPOSITORY")
 	}
 
-	if sha == "" {
-		githubactions.Fatalf("missing GITHUB_SHA")
+	if prNumber == 0 {
+		githubactions.Fatalf("missing pr-number")
 	}
 
-	githubactions.Debugf("repo: %s, sha: %s", repository, sha)
+	githubactions.Debugf("repo: %s, sha: %s", repository, prNumber)
 
 	gc := NewGClient(githubToken, repository)
-	pr, err := gc.getDiff(context.Background(), sha)
+	pr, err := gc.getDiff(context.Background(), prNumber)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
 	}
