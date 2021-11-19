@@ -14,7 +14,7 @@ type Report struct {
 
 type File struct {
 	Filename   string      `json:"filename"`
-	Violations []Violation `json:"violations"`
+	Violations Violations `json:"violations"`
 }
 
 type Violation struct {
@@ -29,6 +29,8 @@ type Violation struct {
 	ExternalInfoUrl string `json:"externalInfoUrl"`
 }
 
+type Violations []Violation
+
 // Parse reads a PMD report in JSON format
 // and returns a Report.
 func Parse(pmdstring io.Reader) (Report, error) {
@@ -39,3 +41,4 @@ func Parse(pmdstring io.Reader) (Report, error) {
 	}
 	return report, nil
 }
+
