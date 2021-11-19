@@ -17,6 +17,9 @@ inputs:
       the report creation.
     required: false
     default: ''
+  sha:
+    description: the sha to use
+    required: true
 
 runs:
   using: 'docker'

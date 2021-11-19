@@ -13,15 +13,17 @@ import (
 )
 
 var (
-	dir              string
-	reportfile       string
+	dir         string
+	reportfile  string
 	githubToken string
+	sha         string
 )
 
 func main() {
 	flag.StringVar(&dir, "dir", "", "")
 	flag.StringVar(&reportfile, "reportfile", "", "")
 	flag.StringVar(&githubToken, "github-token", "", "")
+	flag.StringVar(&sha, "sha", "", "")
 	flag.Parse()
 
 	if reportfile == "" {
@@ -40,7 +42,6 @@ func main() {
 		githubactions.Fatalf("missing GITHUB_REPOSITORY")
 	}
 
-	sha := os.Getenv("GITHUB_SHA")
 	if sha == "" {
 		githubactions.Fatalf("missing GITHUB_SHA")
 	}
