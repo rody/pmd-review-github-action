@@ -36,13 +36,7 @@ func (gc *GClient) getDiff(ctx context.Context, prNumber int) (*diffparser.Diff,
 		return nil, err
 	}
 
-
-	req, err := gc.client.NewRequest("GET", pr.GetDiffURL(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := gc.client.Do(ctx, req, nil)
+	res, err := gc.client.Client().Get(pr.GetDiffURL())
 	if err != nil {
 		return nil, err
 	}
