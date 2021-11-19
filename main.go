@@ -82,8 +82,12 @@ func getChanged(diff *diffparser.Diff) LineChanges {
 		for _, h := range f.Hunks {
 			for _, dl := range h.NewRange.Lines {
 				if dl.Mode == diffparser.ADDED {
-					dlv := fv[f.NewName]
+					dlv, exists := fv[f.NewName]
+					if !exists {
+						dlv = make(map[int]*diffparser.DiffLine)
+					}
 					dlv[dl.Number] = dl
+					fv[f.NewName] = dlv
 				}
 			}
 		}
