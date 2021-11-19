@@ -4,9 +4,8 @@ import (
 	"context"
 	"flag"
 	"os"
-	"path/filepath"
-	"strings"
 
+	"github.com/google/go-github/v40/github"
 	"github.com/rody/pmd-review-github-action/pmd"
 	"github.com/sethvargo/go-githubactions"
 	"github.com/waigani/diffparser"
@@ -56,106 +55,75 @@ func main() {
 
 	githubactions.Debugf("diff %+v", *diff)
 
-	changed := getChanged(diff)
-	githubactions.Debugf("diff %+v", changed)
-
-	report, err := parseReport(reportfile)
+	violations, err := parseReport(reportfile)
 	if err != nil {
 		githubactions.Fatalf("could not parse reportfile: %s", err)
 	}
 
-	tr, err := GetViolationsForDiff(report, changed)
-	if err != nil {
-		githubactions.Fatalf("could not get violations: %s", err)
+	comments := getReviewComments(diff, violations)
+	githubactions.Debugf("diff %+v", comments)
+
+	if len(comments) == 0 {
+		githubactions.Infof("no issue")
+		return
 	}
-	githubactions.Debugf("violations %+v", tr)
+
+	msg := "Some changes are required :D"
+	review := github.PullRequestReviewRequest{
+		Body: &msg,
+		Comments: comments,
+
+	}
+
+	gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
+
 }
 
-func getChanged(diff *diffparser.Diff) LineChanges {
-	fv := make(LineChanges)
+func getReviewComments(diff *diffparser.Diff, violations map[string]pmd.LineViolations) []*github.DraftReviewComment {
+	var comments []*github.DraftReviewComment
 
 	for _, f := range diff.Files {
 		if f.Mode == diffparser.DELETED {
 			continue
 		}
 
+		lvs, exists := violations[f.NewName]
+		if !exists {
+			// no violations for this file
+			continue
+		}
+
 		for _, h := range f.Hunks {
 			for _, dl := range h.NewRange.Lines {
-				if dl.Mode == diffparser.ADDED {
-					dlv, exists := fv[f.NewName]
-					if !exists {
-						dlv = make(map[int]*diffparser.DiffLine)
-					}
-					dlv[dl.Number] = dl
-					fv[f.NewName] = dlv
+				if dl.Mode != diffparser.ADDED {
+					continue
+				}
+
+				vs, exists := lvs[dl.Number]
+				if !exists {
+					// no violations for this line
+					continue
+				}
+
+				for _, v := range vs {
+					comments = append(comments, &github.DraftReviewComment{
+						Path: &v.FileName,
+						Position: &dl.Position,
+						Body: &v.Description,
+						Line: &v.BeginLine,
+					})
 				}
 			}
 		}
 	}
-	return fv
+	return comments
 }
 
-type LineChanges map[string]map[int]*diffparser.DiffLine
-
-func GetViolationsForDiff(r pmd.Report, lc LineChanges) ([]toReport, error) {
-	var tr []toReport
-	for _, f := range r.Files {
-		fn, err := relpath(f.Filename)
-		if err != nil {
-			return tr, err
-		}
-
-		lines, exists := lc[fn]
-		if !exists {
-			// file not present in diff
-			continue
-		}
-
-		for _, v := range f.Violations {
-			line, exists := lines[v.BeginLine]
-			if !exists {
-				continue
-			}
-
-			tr = append(tr, toReport{
-				Violation: v,
-				Line:      line,
-			})
-
-		}
-	}
-
-	return tr, nil
-}
-
-type toReport struct {
-	Violation pmd.Violation
-	Line      *diffparser.DiffLine
-}
-
-func relpath(file string) (string, error) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	filename := filepath.Join(dir, file)
-
-	if strings.HasPrefix(filename, "/") {
-		return filepath.Rel(cwd, filename)
-	}
-
-	return filename, nil
-}
-
-func parseReport(filename string) (pmd.Report, error) {
+func parseReport(filename string) (map[string]pmd.LineViolations, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		return pmd.Report{}, err
+		return nil, err
 	}
 	defer f.Close()
-	return pmd.Parse(f)
+	return pmd.Parse(f, dir)
 }
-
-type LineViolations map[int][]pmd.Violations
-type FileViolations map[string]LineViolations
