@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"strings"
 
 	"github.com/google/go-github/v40/github"
@@ -47,23 +45,11 @@ func (gc *GClient) getPullRequest(ctx context.Context, prNumber int) (*github.Pu
 	return pr, nil
 }
 
-func (gc *GClient) getDiff(ctx context.Context, pr *github.PullRequest) (*diffparser.Diff, error) {
-	req, err := http.NewRequest("GET", pr.GetDiffURL(), nil)
-	req.Header.Add("Authorization", fmt.Sprintf("token %s", gc.token))
+func (gc *GClient) getDiff(ctx context.Context, prNumber int) (*diffparser.Diff, error) {
+	diff, _, err := gc.client.PullRequests.GetRaw(ctx, gc.Owner, gc.Repo, prNumber, github.RawOptions{Type: github.Diff})
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := gc.client.BareDo(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return diffparser.Parse(string(b))
+	return diffparser.Parse(diff)
 }

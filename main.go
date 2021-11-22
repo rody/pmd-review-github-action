@@ -64,12 +64,7 @@ func main() {
 
 	githubactions.Debugf("gc client, owner: '%s', repo: '%s'", gc.Owner, gc.Repo)
 
-	pr, err := gc.getPullRequest(context.Background(), prNumber)
-	if err != nil {
-		githubactions.Fatalf("could not get the details of PR '%d'", prNumber)
-	}
-
-	diff, err := gc.getDiff(context.Background(), pr)
+	diff, err := gc.getDiff(context.Background(), prNumber)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
 	}
