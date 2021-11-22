@@ -1,0 +1,37 @@
+name: "PMD Code Review"
+description: "Creates a Code Review from a PMD report"
+author: "Rodolphe Blancho"
+
+inputs:
+  reportfile:
+    description: |
+      Location of the report file relative to the project root.
+      This action supports only reports using the JSON format.
+    required: true
+    default: 'pmd-report.json'
+  dir:
+    description: |
+      Required if the report was created using the `-shortnames` option and
+      the `-dir` option was set to a different value.
+      This value should be the same as the value given to `-dir` during
+      the report creation.
+    required: false
+    default: ''
+  pr-number:
+    description: the pr-number
+    required: true
+
+runs:
+  using: 'docker'
+  image: 'docker://rawdee/pmd-review-github-action'
+  args:
+    - --reportfile
+    - ${{ inputs.reportfile }}
+    - --dir
+    - ${{ inputs.dir }}
+    - --pr-number
+    - ${{ inputs.pr-number }}
+
+branding:
+  icon: 'flag'
+  color: 'red'
