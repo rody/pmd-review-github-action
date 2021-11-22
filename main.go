@@ -26,7 +26,7 @@ func main() {
 	flag.IntVar(&prNumber, "pr-number", 0, "")
 	flag.Parse()
 
-	githubactions.Debugf("prNumber: %s", prNumber)
+	githubactions.Debugf("prNumber: %d", prNumber)
 
 	if reportfile == "" {
 		githubactions.Fatalf("missing input 'reportfile'")
@@ -52,6 +52,10 @@ func main() {
 	diff, err := gc.getDiff(context.Background(), prNumber)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
+	}
+
+	if diff.PullID == 0 {
+		githubactions.Fatalf("could not get diff for pull request '%d': %s", prNumber, diff.Raw)
 	}
 
 	githubactions.Debugf("diff %+v", *diff)
