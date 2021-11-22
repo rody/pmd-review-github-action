@@ -23,7 +23,7 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'docker://rawdee/pmd-review-github-action'
   args:
     - --reportfile
     - ${{ inputs.reportfile }}
