@@ -50,7 +50,9 @@ func main() {
 
 	gc := NewGClient(githubToken, repository)
 
-	githubactions.Debugf("getting diff for repo '%s' and PR '%s'", repository, prNumber)
+	githubactions.Debugf("gc client, owner: '%s', repo: '%s'", gc.Owner, gc.Repo)
+
+	githubactions.Debugf("getting diff for repo '%s' and PR '%d'", repository, prNumber)
 	diff, err := gc.getDiff(context.Background(), prNumber)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
@@ -83,12 +85,12 @@ func main() {
 		Event: &event,
 	}
 
-	preview, _, err := gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
+	prReview, _, err := gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
 	if err != nil {
 		githubactions.Fatalf("Could not create review: %s", err)
 	}
 
-	githubactions.Debugf("review: %+v", preview)
+	githubactions.Debugf("review: %+v", prReview)
 }
 
 func getReviewComments(diff *diffparser.Diff, violations map[string]pmd.LineViolations) []*github.DraftReviewComment {
