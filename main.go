@@ -49,6 +49,8 @@ func main() {
 	}
 
 	gc := NewGClient(githubToken, repository)
+
+	githubactions.Debugf("getting diff for repo '%s' and PR '%s'", repository, prNumber)
 	diff, err := gc.getDiff(context.Background(), prNumber)
 	if err != nil {
 		githubactions.Fatalf("%s", err)
