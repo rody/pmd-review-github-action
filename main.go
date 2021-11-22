@@ -16,6 +16,7 @@ var (
 	reportfile  string
 	githubToken string
 	prNumber    int
+
 )
 
 func main() {
@@ -70,10 +71,12 @@ func main() {
 
 	msg := "Some changes are required :D"
 	event := "REQUEST_CHANGES"
+    commitID := os.Getenv("GITHUB_SHA")
 	review := github.PullRequestReviewRequest{
 		Body: &msg,
 		Comments: comments,
 		Event: &event,
+		CommitID: &commitID,
 	}
 
 	preview, _, err := gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
