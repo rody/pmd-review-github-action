@@ -48,26 +48,33 @@ func main() {
 		githubactions.Fatalf("missing pr-number")
 	}
 
-	gc := NewGClient(githubToken, repository)
-
-	githubactions.Debugf("gc client, owner: '%s', repo: '%s'", gc.Owner, gc.Repo)
-
-	githubactions.Debugf("getting diff for repo '%s' and PR '%d'", repository, prNumber)
-	diff, err := gc.getDiff(context.Background(), prNumber)
-	if err != nil {
-		githubactions.Fatalf("%s", err)
-	}
-
-	if diff.PullID == 0 {
-		githubactions.Fatalf("could not get diff for pull request '%d': %s", prNumber, diff.Raw)
-	}
-
-	githubactions.Debugf("diff %+v", *diff)
-
 	violations, err := parseReport(reportfile)
 	if err != nil {
 		githubactions.Fatalf("could not parse reportfile: %s", err)
 	}
+
+	githubactions.Debugf("violations: %+v", violations)
+
+	if len(violations) == 0 {
+		githubactions.Infof("no rule violation found in report.")
+		return
+	}
+
+	gc := NewGClient(githubToken, repository)
+
+	githubactions.Debugf("gc client, owner: '%s', repo: '%s'", gc.Owner, gc.Repo)
+
+	pr, err := gc.getPullRequest(context.Background(), prNumber)
+	if err != nil {
+		githubactions.Fatalf("could not get the details of PR '%d'", prNumber)
+	}
+
+	diff, err := gc.getDiff(context.Background(), pr)
+	if err != nil {
+		githubactions.Fatalf("%s", err)
+	}
+
+	githubactions.Debugf(diff.Raw)
 
 	comments := getReviewComments(diff, violations)
 	githubactions.Debugf("diff %+v", comments)

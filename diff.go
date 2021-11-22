@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strings"
 
 	"github.com/google/go-github/v40/github"
@@ -11,6 +13,7 @@ import (
 )
 
 type GClient struct {
+	token string
 	client *github.Client
 	Owner  string
 	Repo   string
@@ -24,19 +27,34 @@ func NewGClient(token, repository string) *GClient {
 	tc := oauth2.NewClient(ctx, ts)
 
 	return &GClient{
+		token: token,
 		client: github.NewClient(tc),
 		Owner:  strings.Split(repository, "/")[0],
 		Repo:   strings.Split(repository, "/")[1],
 	}
 }
 
-func (gc *GClient) getDiff(ctx context.Context, prNumber int) (*diffparser.Diff, error) {
-	pr, _, err := gc.client.PullRequests.Get(ctx, gc.Owner, gc.Repo, prNumber)
+func (gc *GClient) getPullRequest(ctx context.Context, prNumber int) (*github.PullRequest, error) {
+	pr, resp, err := gc.client.PullRequests.Get(ctx, gc.Owner, gc.Repo, prNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := gc.client.Client().Get(pr.GetDiffURL())
+	if pr.GetNumber() == 0 {
+		return nil, fmt.Errorf("could not find pull request with number '%d', %+v", prNumber, resp)
+	}
+
+	return pr, nil
+}
+
+func (gc *GClient) getDiff(ctx context.Context, pr *github.PullRequest) (*diffparser.Diff, error) {
+	req, err := http.NewRequest("GET", pr.GetDiffURL(), nil)
+	req.Header.Add("Authorization", fmt.Sprintf("token %s", gc.token))
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := gc.client.BareDo(ctx, req)
 	if err != nil {
 		return nil, err
 	}
