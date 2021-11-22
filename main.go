@@ -69,14 +69,12 @@ func main() {
 		return
 	}
 
-	msg := "Some changes are required :D"
+	msg := "Some changes are required"
 	event := "REQUEST_CHANGES"
-    commitID := os.Getenv("GITHUB_SHA")
 	review := github.PullRequestReviewRequest{
 		Body: &msg,
 		Comments: comments,
 		Event: &event,
-		CommitID: &commitID,
 	}
 
 	preview, _, err := gc.client.PullRequests.CreateReview(context.Background(), gc.Owner, gc.Repo, prNumber, &review)
